@@ -4,12 +4,15 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 public class CrashDetector : MonoBehaviour
 {
-
     [SerializeField] float delayToReloadSeconds = 1f;
     [SerializeField] ParticleSystem crashEffect;
-
     CircleCollider2D head;
+    [SerializeField] AudioClip crashSFX;
 
+    [SerializeField] PlayerController playerController;
+
+
+    bool hasCrashed = false;
     void Start()
     {
         head = GetComponent<CircleCollider2D>();
@@ -17,9 +20,13 @@ public class CrashDetector : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D other)
     {
-        if (other.collider.tag == "Ground" && head.IsTouching(other.collider))
+        if (!hasCrashed && other.collider.tag == "Ground" && head.IsTouching(other.collider))
         {
+            hasCrashed = true;
+            
+            FindObjectOfType<PlayerController>().DisableControls();
             crashEffect.Play();
+            GetComponent<AudioSource>().PlayOneShot(crashSFX);
             Invoke(nameof(ReloadScene), delayToReloadSeconds);
         }
     }
